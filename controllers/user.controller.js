@@ -84,13 +84,13 @@ const loginUser = async (req, res, next) => {
         return res.status(201).cookie('token', token, {expiresIn: "1d", httpOnly: true}).json({
             success: true,
             message: "User login successfully",
-            token: token
+            user
         })
-        res.json({
-            success: true,
-            message: "User login successfully",
-            token: token
-        })
+        // res.json({
+        //     success: true,
+        //     message: "User login successfully",
+        //     token: token
+        // })
     }catch(err){
         return res.status(400).json({
             success: false,
@@ -113,9 +113,173 @@ const logoutUser = async (req, res) =>{
 }
 
 
+const bookmarksTweet = async (req, res, next) => {
+    try{  
+        const loggedInUserId = req.userId;
+        const tweetId = req.params.id;
+
+        if(!loggedInUserId || !tweetId){
+            return res.status(401).json({
+                success: false,
+                messege: "Invalid id",
+            })
+        }
+        
+        const user = await UserModel.findById(loggedInUserId);
+
+        if(user.bookmarks.includes(tweetId)){
+            //remove bookmarks
+            await UserModel.findByIdAndUpdate(loggedInUserId, {
+                $pull: {
+                    bookmarks: tweetId
+                }
+            })
+
+            res.json({
+                success: true,
+                message: "Tweet remove as a bookmark successfully"
+            })
+    
+        }else{
+            //like
+            await UserModel.findByIdAndUpdate(loggedInUserId, {
+                $push: {
+                    bookmarks: tweetId
+                }
+            })
+            res.json({
+                success: true,
+                message: "Tweet save as bookmark successfully"
+            })
+    
+        }
+        
+        
+    }catch(err){
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: err.message
+        })
+    }
+}  
+
+
+const getUserProfile = async (req, res, next) => {
+    try{  
+        const id = req.params.id;
+        const user = await UserModel.findById(id).select('-password');
+        res.json({
+            success: true,
+            message: "user details sent successfully",
+            user,
+        })
+        
+    }catch(err){
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: err.message
+        })
+    }
+}  
+
+const getOtherUsers = async (req, res, next) => {
+    try{  
+        const loggedInUserId = req.userId;
+        const users = await UserModel.find({
+            _id: {
+                $ne: loggedInUserId
+            }
+        }).select('-password');
+
+        if(!users){
+            return res.status(401).json({
+                success:false,
+                message: "Currently oteher user does not exist"
+            })
+        }
+
+        res.json({
+            success: true,
+            message: "user details sent successfully",
+            length: users.length,
+            users ,
+        })
+        
+    }catch(err){
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: err.message
+        })
+    }
+}  
+
+const followOrUnfollow = async (req, res, next) => {
+    try{
+        const loggedInUserId = req.userId;
+        const personId = req.params.id;
+        const loggedUserDetails = await UserModel.findById(loggedInUserId);
+        const personToFollowDetails = await UserModel.findById(personId);
+
+        if(personToFollowDetails.followers.includes(loggedInUserId)){
+            //Unfollow 
+            await personToFollowDetails.updateOne({
+                $pull:{
+                    followers: loggedInUserId,
+                }
+            })
+            await loggedUserDetails.updateOne({
+                $pull:{
+                    following: personId,
+                }
+            })
+
+            return res.json({
+                success: true,
+                message: `${loggedUserDetails.firstName} unfollow the ${personToFollowDetails.firstName}`,
+            })
+
+        }else{
+            //Follow
+            await personToFollowDetails.updateOne({
+                $push:{
+                    followers: loggedInUserId,
+                }
+            })
+            await loggedUserDetails.updateOne({
+                $push:{
+                    following: personId,
+                }
+            })
+
+            return res.json({
+                success: true,
+                message: `${loggedUserDetails.firstName} follow the ${personToFollowDetails.firstName}`,
+            })
+        }
+
+        
+        
+    }catch(err){
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: err.message
+        })
+    }
+}  
+
+
+
 
 module.exports = {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    bookmarksTweet,
+    getUserProfile,
+    getOtherUsers,
+    followOrUnfollow,
 }
