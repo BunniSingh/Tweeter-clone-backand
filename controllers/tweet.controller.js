@@ -40,7 +40,7 @@ const likeOrUnlike = async (req, res, next) => {
         const loggedInUserId = req.userId;
         const tweetId = req.params.id;
 
-        if(!loggedInUserId || !tweetId){
+        if(!tweetId){
             return res.status(401).json({
                 success: false,
                 messege: "Invalid id",
@@ -127,7 +127,9 @@ const getAllTweets = async (req, res, next) =>{
             return TweetsModel.find({userId: personId}).populate('userId', 'firstName lastName email, userName');
         }))
 
-        const allTweets = [...userTwittes, ...followingPersonsTweets.flat()];
+        const allTweets = [...userTwittes, ...followingPersonsTweets.flat()].sort((a , b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
 
 
         res.json({
@@ -152,16 +154,18 @@ const getFollowingTweets = async (req, res, next) =>{
         let loggedInUserId = req.userId;
         const user = await UserModel.findById(loggedInUserId);
         const followingPersonsTweets = await Promise.all(user.following.map(personId => {
-            return TweetsModel.find({userId: personId});
+            return TweetsModel.find({userId: personId}).populate('userId', 'firstName lastName email, userName');
         }))
 
-        console.log(user)
+        const allTweets = followingPersonsTweets.flat().sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
 
         res.json({
             success: true,
             message: "Get Following tweets API",
-            tweetLength: followingPersonsTweets.length,
-            result: followingPersonsTweets
+            tweetLength: allTweets.length,
+            result: allTweets
         })
         
     } catch (error) {
