@@ -12,20 +12,17 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 8080;
 
-// const DB_URI = process.env.DB_CONNECTION_STRING;
-// mongoose.connect(`${DB_URI}/twitter-database`)
-// .then(()=> console.log("DB Connected Successfully"))
-// .catch((err) => console.log(err));
 dataBaseConnection()
 
 //middlewares
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5174",
     credentials: true,
 }));
-app.use(express.urlencoded({ extended: true }));
 app.use(cookie_parser())
-app.use(express.json())
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 
 
 //routes

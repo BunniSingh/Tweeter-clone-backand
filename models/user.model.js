@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    imageUrl: {
+      type: String,
+      default: "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg"
+    },
     firstName: {
       type: String,
       required: true,

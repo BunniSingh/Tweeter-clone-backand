@@ -6,6 +6,7 @@ require('dotenv').config();
 const registerUser = async (req, res, next) => {
     try{
         const {firstName, lastName , userName, email, password} = req.body;
+        const imageUrl = req.file ? req.file.path : undefined;
 
         if(!firstName || !userName || !email || !password){
             return res.status(401).json({
@@ -30,11 +31,12 @@ const registerUser = async (req, res, next) => {
             userName,
             password: hashPassword,
             email,
+            imageUrl
         })
 
         res.json({
             success: true,
-            message: "User register successfully"
+            message: "User signed up successfully!"
         })
     }catch(err){
         return res.status(400).json({
@@ -44,6 +46,8 @@ const registerUser = async (req, res, next) => {
         })
     }
 }
+
+
 const loginUser = async (req, res, next) => {
     try{
         const {email, password} = req.body;
