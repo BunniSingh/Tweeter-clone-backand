@@ -121,10 +121,10 @@ const getAllTweets = async (req, res, next) =>{
     try {
         let loggedInUserId = req.userId;
         const user = await UserModel.findById(loggedInUserId);
-        const userTwittes = await TweetsModel.find({userId: loggedInUserId}).populate('userId', 'firstName lastName email userName')
+        const userTwittes = await TweetsModel.find({userId: loggedInUserId}).populate('userId', 'firstName lastName email userName imageUrl')
 
         const followingPersonsTweets = await Promise.all(user.following.map(personId => {
-            return TweetsModel.find({userId: personId}).populate('userId', 'firstName lastName email, userName');
+            return TweetsModel.find({userId: personId}).populate('userId', 'firstName lastName email userName imageUrl');
         }))
 
         const allTweets = [...userTwittes, ...followingPersonsTweets.flat()].sort((a , b) => {
@@ -143,7 +143,7 @@ const getAllTweets = async (req, res, next) =>{
         return res.status(400).json({
             success: false,
             messege: "catch block",
-            error: err.message
+            error: error.message
         })
     }
 }
@@ -154,7 +154,7 @@ const getFollowingTweets = async (req, res, next) =>{
         let loggedInUserId = req.userId;
         const user = await UserModel.findById(loggedInUserId);
         const followingPersonsTweets = await Promise.all(user.following.map(personId => {
-            return TweetsModel.find({userId: personId}).populate('userId', 'firstName lastName email, userName');
+            return TweetsModel.find({userId: personId}).populate('userId', 'firstName lastName email userName imageUrl');
         }))
 
         const allTweets = followingPersonsTweets.flat().sort((a, b) => {
@@ -172,7 +172,35 @@ const getFollowingTweets = async (req, res, next) =>{
         return res.status(400).json({
             success: false,
             messege: "catch block",
-            error: err.message
+            error: error.message
+        })
+    }
+}
+
+const getBookmarkTweets = async (req, res, next) =>{
+    try {
+        let loggedInUserId = req.userId;
+        const user = await UserModel.findById(loggedInUserId);
+        const followingPersonsTweets = await Promise.all(user.bookmarks.map(personId => {
+            return TweetsModel.find({_id: personId}).populate('userId', 'firstName lastName email userName imageUrl');
+        }))
+
+        const allTweets = followingPersonsTweets.flat().sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+
+        res.json({
+            success: true,
+            message: "Get bookmark tweets API",
+            tweetLength: allTweets.length,
+            result: allTweets
+        })
+        
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: error.message
         })
     }
 }
@@ -183,5 +211,6 @@ module.exports = {
     likeOrUnlike,
     getAllTweets,
     getFollowingTweets,
+    getBookmarkTweets,
 
 }
