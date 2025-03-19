@@ -48,6 +48,7 @@ const userSchema = new mongoose.Schema(
     },
     bookmarks: {
       type: Array,
+      ref:"tweets",
       default: [],
     },
   },
