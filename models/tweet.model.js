@@ -13,12 +13,12 @@ const tweetSchema = new mongoose.Schema(
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Users"
+        ref: "User"
     },
     
   },
   { timestamps: true }
 ); 
 
-const TweetsModel  = mongoose.model("tweets", tweetSchema);
+const TweetsModel  = mongoose.model("tweet", tweetSchema);
 module.exports = TweetsModel;

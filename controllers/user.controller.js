@@ -1,10 +1,13 @@
-const UserModel = require("../models/user.model");
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const UserModel = require('../models/user.model');
 require('dotenv').config();
 
 const registerUser = async (req, res, next) => {
     try{
+        console.log("BODY:", req.body);
+        console.log("FILE:", req.file);
         const {firstName, lastName , userName, email, password} = req.body;
         const imageUrl = req.file ? req.file.path : undefined;
 

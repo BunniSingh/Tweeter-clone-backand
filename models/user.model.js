@@ -48,12 +48,12 @@ const userSchema = new mongoose.Schema(
     },
     bookmarks: {
       type: Array,
-      ref:"tweets",
+      ref:"tweet",
       default: [],
     },
   },
   { timestamps: true }
 ); 
 
-const UserModel = mongoose.model("Users", userSchema);
+const UserModel = mongoose.model("User", userSchema);
 module.exports = UserModel;
