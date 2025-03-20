@@ -18,6 +18,8 @@ const allowedOrigins = [
   "https://tweeter-clone-frontend-ochre.vercel.app", // Your Vercel frontend
 ];
 
+// "https://tweeter-clone-backand.onrender.com", //backend Base url
+
 //middlewares
 app.use(
   cors({

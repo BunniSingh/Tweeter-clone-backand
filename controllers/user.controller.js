@@ -51,6 +51,7 @@ const registerUser = async (req, res, next) => {
 }
 
 
+//Login API
 const loginUser = async (req, res, next) => {
     try{
         const {email, password} = req.body;
@@ -78,26 +79,25 @@ const loginUser = async (req, res, next) => {
             }) 
         }
 
-        // let currentTimeInSec = parseInt(Date.now()/1000);
-        // let tockenObj = {
-        //     iat: currentTimeInSec,
-        //     exp: currentTimeInSec + 3600,
-        //     id: user._id  
-        // }
         const token = jwt.sign({id: user._id}, process.env.JWT_KEY, {expiresIn: "1d"});
         
         await UserModel.findByIdAndUpdate(user._id, {token})
         
-        return res.status(201).cookie('token', token, {expiresIn: "1d", httpOnly: true}).json({
+        const cookieOptions = {
+            httpOnly: true,
+            secure: true,        // Important for HTTPS (like on Vercel)
+            sameSite: 'none',    // Allows cross-origin cookies
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
+        };
+        
+        res.cookie('token', token, cookieOptions);
+        
+        return res.status(201).json({
             success: true,
             message: "User login successfully",
             user
-        })
-        // res.json({
-        //     success: true,
-        //     message: "User login successfully",
-        //     token: token
-        // })
+        });
+
     }catch(err){
         return res.status(400).json({
             success: false,
@@ -109,10 +109,7 @@ const loginUser = async (req, res, next) => {
 
 
 const logoutUser = async (req, res) =>{
-    // res.json({
-    //     success: true,
-    //     message: "User logout successfully"
-    // })
+    
     return res.status(201).cookie('token' , "" , {expaireIn: new Date(Date.now())}).json({
         success: true,
         message: "User logged out successfully",
