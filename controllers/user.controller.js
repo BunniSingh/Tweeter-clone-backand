@@ -84,10 +84,10 @@ const loginUser = async (req, res, next) => {
         await UserModel.findByIdAndUpdate(user._id, {token})
         
         const cookieOptions = {
+            expiresIn: "1d",
             httpOnly: true,
             secure: true,        // Important for HTTPS (like on Vercel)
             sameSite: 'none',    // Allows cross-origin cookies
-            maxAge: 24 * 60 * 60 * 1000 // 1 day
         };
         
         res.cookie('token', token, cookieOptions);
