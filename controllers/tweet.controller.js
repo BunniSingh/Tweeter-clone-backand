@@ -7,6 +7,8 @@ const createTweet = async (req, res, next) => {
     try{
         const loggedInUserId = req.userId;
         const {description} = req.body;
+        const postImageUrl = req.file ? req.file.path : undefined;
+
 
         if(!description){
             return res.status(401).json({
@@ -18,6 +20,7 @@ const createTweet = async (req, res, next) => {
         await TweetsModel.create({
             description,
             userId: loggedInUserId,
+            postImageUrl
         })
 
         res.json({

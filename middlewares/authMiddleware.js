@@ -14,7 +14,6 @@ const authMiddleware = async (req, res, next) => {
 
         const isTokenValid = await jwt.verify(token, process.env.JWT_KEY);
         req.userId = isTokenValid.id;
-        console.log(isTokenValid)
         next();
     }catch(err){
         next(err)
