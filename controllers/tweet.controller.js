@@ -238,6 +238,61 @@ const addComment = async (req, res, next) =>{
         })
     }
 }
+const editComment = async (req, res, next) =>{
+    try {
+        let loggedInUserId = req.userId;
+        let {tweetId, comment, commentId} = req.body;
+
+        console.log(tweetId, comment, commentId)
+    
+        await TweetsModel.updateOne({
+            _id: tweetId,
+            "comments._id": commentId
+        },{
+            $set: {
+                "comments.$.comment": comment,
+            }
+        })
+
+        res.json({
+            success: true,
+            message: "Comment added successfully",
+        })
+        
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: error.message
+        })
+    }
+}
+
+
+const deleteComment = async (req, res, next) =>{
+    try {
+        let {commentId, tweetId} = req.body;
+        let update = await TweetsModel.findByIdAndUpdate(tweetId, {
+            $pull: {
+                comments: {
+                    _id: commentId
+                }
+            }
+        })
+
+        res.json({
+            success: true,
+            message: "Comment deleted successfully",
+        })
+        
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: error.message
+        })
+    }
+}
 
 const getAllCommens = async (req, res, next) => {
     try {
@@ -286,5 +341,7 @@ module.exports = {
     getBookmarkTweets,
     addComment,
     getAllCommens,
+    deleteComment,
+    editComment,
 
 }
