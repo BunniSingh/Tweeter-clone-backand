@@ -208,6 +208,75 @@ const getBookmarkTweets = async (req, res, next) =>{
     }
 }
 
+
+
+const addComment = async (req, res, next) =>{
+    try {
+        let loggedInUserId = req.userId;
+        let {tweetId, comment} = req.body;
+
+        console.log(tweetId, comment)
+        let update = await TweetsModel.findByIdAndUpdate(tweetId, {
+            $push: {
+                comments: {
+                    userId: loggedInUserId,
+                    comment
+                }
+            }
+        })
+
+        res.json({
+            success: true,
+            message: "Comment added successfully",
+        })
+        
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            messege: "catch block",
+            error: error.message
+        })
+    }
+}
+
+const getAllCommens = async (req, res, next) => {
+    try {
+      // let loggedInUserId = req.userId;
+      
+      let tweetId = req.params.id;
+      const tweet = await TweetsModel.findById(tweetId)
+        .populate({
+          path: 'comments.userId',
+          select: 'firstName lastName imageUrl'
+        })
+        .sort({ 'comments.createdAt': -1 });
+  
+      if (!tweet) {
+        return res.status(404).json({
+          success: false,
+          message: "Tweet not found",
+        });
+      }
+  
+      const allComments = tweet.comments;
+  
+      res.json({
+        success: true,
+        message: "Get All comments API",
+        tweetLength: allComments.length,
+        result: allComments
+      });
+      
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Error in fetching comments",
+        error: error.message
+      });
+    }
+  }
+  
+
 module.exports = {
     createTweet,
     deleteTweet,
@@ -215,5 +284,7 @@ module.exports = {
     getAllTweets,
     getFollowingTweets,
     getBookmarkTweets,
+    addComment,
+    getAllCommens,
 
 }
